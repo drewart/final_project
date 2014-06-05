@@ -1,6 +1,10 @@
 final_project
 =============
 
+# Notes
+ - Given our timeline, the files SysLib_fil.java and Kernel_lib.java are being provided
+ - If you get "Test Completed", then you know you are done.
+
 
 ## Relevant Links:
 https://onedrive.live.com/view.aspx?cid=16DF065DFCD8345E&resid=16DF065DFCD8345E%212437&app=OneNote&authkey=%21AKVHcC8oQZfcR84
