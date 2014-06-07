@@ -1,5 +1,3 @@
-final_project
-=============
 ## Sections:
 FileSystem.java   <--- Danielle?
 ------------------------
