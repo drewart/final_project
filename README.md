@@ -1,11 +1,11 @@
 ## Sections:
-FileSystem.java   <--- Danielle?
-~~~~~~~~~~~~~~~~~
-Directory.java    
-FileTable.java
-~~~~~~~~~~~~~~~~~
-Inode.java
-SuperBlock.java
+ - [] FileSystem.java   <--- Danielle?
+
+ - [] Directory.java    
+ - [] FileTable.java
+
+ - [] Inode.java
+ - [] SuperBlock.java
 
 ## Notes:
  - Given our timeline, the files SysLib_fil.java and Kernel_lib.java are being provided
