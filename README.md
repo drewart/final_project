@@ -1,7 +1,11 @@
-final_project
-=============
+## Sections:
+ - [ ] FileSystem.java   <--- Danielle
+ - [ ] Directory.java    <--- Drew
+ - [ ] FileTable.java    <--- Drew
+ - [ ] Inode.java        <--- Tim 
+ - [ ] SuperBlock.java   <--- Tim
 
-# Notes
+## Notes:
  - Given our timeline, the files SysLib_fil.java and Kernel_lib.java are being provided
  - If you get "Test Completed", then you know you are done.
 
