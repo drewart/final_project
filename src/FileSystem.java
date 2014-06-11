@@ -18,7 +18,7 @@ public class FileSystem extends Thread
         this.superblock = new SuperBlock(diskBlocks);
         // create directory, and register "/" in directory entry 0
         this.directory = new Directory(this.superblock.inodeBlocks);
-        // file table is created, and store directory in the file table
+        // filetable is created, and store directory in the filetable
         this.filetable = new FileTable(this.directory);
 
         // directory reconstruction
@@ -33,8 +33,24 @@ public class FileSystem extends Thread
         }
         close(dirEnt);
     }
-     
-    // opens the file specified by the fileName string in the given mode (where
+
+    // Formats the disk, (i.e., Disk.java's data contents). The parameter files 
+    // specifies the maximum number of files to be created, (i.e., the number 
+    // of inodes to be allocated) in your file system. The return value is 0 on 
+    // success, otherwise -1.
+    boolean format(int files)
+    { 
+        // Validate input
+        if (files > 0)
+        {
+            // Call the superblock's format
+            this.superblock.format(files);
+            return true;
+        }
+        return false;
+    }
+
+    // Opens the file specified by the fileName string in the given mode (where
     // "r" = ready only, "w" = write only, "w+" = read/write, "a" = append), 
     // and allocates a new file descriptor, fd to this file. The file is 
     // created if it does not exist in the mode "w", "w+" or "a". SysLib.open 
@@ -53,9 +69,11 @@ public class FileSystem extends Thread
         // If the mode is write and not all the blocks have been deallocated...
         if (mode.equals("w") && !deallocAllBlocks(ftEnt))
         {
-            return null; // return null since we have to write
+            // return null since we have to write
+            return null; 
         }
-        return ftEnt;  // Otherwise return opened file
+        // Otherwise return opened file
+        return ftEnt;  
     }
  
     // Closes the file corresponding to fd, commits all file transactions on 
@@ -85,7 +103,7 @@ public class FileSystem extends Thread
             return ftEnt.inode.length;
         }
     }
-     
+ 
     // Destroys the file specified by fileName. If the file is currently open, 
     // it is not destroyed until the last open on it is closed, but new 
     // attempts to open it will fail.
@@ -101,5 +119,4 @@ public class FileSystem extends Thread
         // fail upon any new attempts to open it.
         return close(ftEnt) && this.directory.ifree(iNum);
     }
-
 }
