@@ -1,3 +1,11 @@
+/**
+ * User/Author: Drew Pierce
+ * Team: Danielle Jenkins, Drew Pierce,Timothy Virgillo
+ * Date: 6/12/14
+ *
+ * Description:
+ *  FileTable class used to handle the working File read and writes in the ThreadOS
+ */
 import java.util.*;
 /**
 * FileTable class used to store File usage
@@ -6,6 +14,7 @@ public class FileTable {
 
   private final static short FLAG_UNUSED = 0;
   private final static short FLAG_USED   = 1;
+  private final static short FLAG_USED_WRITE = 2;
   
   private Vector table;
   private Directory dir;
@@ -26,9 +35,9 @@ public class FileTable {
   public synchronized FileTableEntry falloc( String filename, String mode ) {
     // allocate a new file (structure) table entry for this file name
     // allocate/retrieve and register the corresponding inode using dir
-    // increament this inode's count
-    // imediately write back this inode to the disk
-    /// return a reference to theis file (structure) table entry
+    // increment this inode's count
+    // immediately write back this inode to the disk
+    /// return a reference to this file (structure) table entry
     Inode node = null;
     short fileIndex;
     char modeChar = mode.charAt(0);
@@ -39,7 +48,7 @@ public class FileTable {
     // file not created
     if (modeChar == 'r') {
 
-      // if not file name to read
+      // if no file to read return null object
       if (fileIndex == -1)
           return null;
 
@@ -49,11 +58,12 @@ public class FileTable {
       
     } else if ( modeChar == 'w' || modeChar == 'a') {
 
+        // if file does not exit create for write and append
         if (fileIndex == -1)
             fileIndex = dir.ialloc(filename);
 
         node = new Inode();
-        node.flag = 2;
+        node.flag = FLAG_USED_WRITE;
     }
       
     node.toDisk(fileIndex);
