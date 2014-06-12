@@ -4,9 +4,11 @@ import java.util.*;
 */
 public class FileTable {
 
-  private final static short FLAG_UNUSED = 0;
-  private final static short FLAG_USED   = 1;
-  
+  public final static short UNUSED = 0;
+  public final static short USED = 1;
+  public final static short READ = 2;
+  public final static short WRITE = 3;
+  public final static short DELETE = 4;
   private Vector table;
   private Directory dir;
   
@@ -33,34 +35,51 @@ public class FileTable {
     short fileIndex;
     char modeChar = mode.charAt(0);
 
-    // look up file
-    fileIndex = dir.namei(filename);
+    while (true){
+      // look up file
+      fileIndex = dir.namei(filename);
 
-    // file not created
-    if (modeChar == 'r') {
+      // can't find the file
+      if (fileIndex < 0) {
 
-      // if not file name to read
-      if (fileIndex == -1)
+        // if file is read only
+        if (modeChar == 'r')
           return null;
 
+        // allocate the Inode
+        if ((fileIndex = dir.ialloc(filename)) < 0)
+          return null; // return null if fail
+
+        node = new Inode(fileIndex);
+        break;
+      }
+      // create a new inode for the fileindex
       node = new Inode(fileIndex);
-      if (node.flag == FLAG_UNUSED)
-        node.flag = FLAG_USED;
-      
-    } else if ( modeChar == 'w' || modeChar == 'a') {
-
-        if (fileIndex == -1)
-            fileIndex = dir.ialloc(filename);
-
-        node = new Inode();
-        node.flag = 2;
+      if (node.flag == DELETE)
+        return null;
+      if (node.flag == UNUSED || node.flag == USED)
+        break;
+      if (modeChar == 'r')
+        break;
+      try {
+        wait();
+      } catch (InterruptedException e) {}
     }
+
       
+    // increment the node's count
+    node.count += 1;
+
+    // write the node's contents to disk
     node.toDisk(fileIndex);
+
+    // Allocate a new entry 
     FileTableEntry entry = new FileTableEntry(node,fileIndex,mode);
-    entry.count += 1;
+
+    // Add entry to filetable
     table.add(entry);
     
+    // return the reference
     return entry;
   }
   
