@@ -17,7 +17,13 @@ The close method has the requirement of closing the file corresponding to the fi
 ## fsize
 The fsize method has the requirement of returning the size in bytes of the file indicated by the fd. It takes in a file table entry and returns the length of the file table entry's inode.
 
-## Delete
+## delete
 The delete method has the requirement of destroying the file specified by teh filename, but ensuring that it will not be destroyed until the last open is closed and all new attempts to open it should fail. It gets the file table entry by calling an open with the mode "write". It then get's the inode's number from that file table entry and returns a close call on it with the file table entry and a call to ifree using that inode number. I chose to do it this way, because this way it meets the requirements of not being destroyed until the last open on it is closed (the 'close' part) and it calls the directory's ifree method to deallocate the inode number which will cause all new attempts to open it to fail.
+
+## read
+The read method has the requirement of being able to read the buffer length in bytes from the buffer that is passed in as a parameter by starting at the position pointed to by the seek pointer. Also, if any bytes are remainbeing between the curernt seek pointer and the end of the file are less than the buffer length then it needs to read as many bytes as possible and add those to the beginning of the buffer. Finally, it needs to increment the seek pointer by the number of bytes it's read and return the number of bytes read.
+
+Our read method accomplishes this by using two variables, readBytes and lengthRead to hold the number of bytes that have been read and the length of bytes left to read. It then validates that we're in fact in read mode before entering the critical section (the filetable entry) via the javascript synchronized command. Within the critical section, we loop while we still have bytes left to read. If we've gone beyond the filetable entry, we break out. Otherwise, we get the current block that the pointer is pointing to and create a temporary data block before reading the contents of the block the seek pointer was pointing to into the temporary block. Next, we get the offset and determine the remaining bytes in the the block and in the filetable entry as a whole. After that, we use the min method in the math library to get the shortest of the three remaining variables in order to determine the degree we increment the seek pointer and readBytes variable by. Finally, we copy all the data to the buffer, update the seek pointer, readBytes, and lengthRead variables before returning the number of bytes read.
+
 
 
