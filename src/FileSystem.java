@@ -372,10 +372,7 @@ public class FileSystem extends Thread
     {
         // get the FT entry
         FileTableEntry ftEnt = open(filename, "w");
-        if (ftEnt == null)
-        {
-            System.out.println("NULL!!!@!!0");
-        }
+
         // Get the entry's inode number
         short iNum = ftEnt.iNumber; 
 
