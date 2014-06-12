@@ -5,6 +5,9 @@
 ## constructor
 The filesystem constructor initializes three main objects: it creates a superblock along with formatting the disk with 64 inodes by default, creats a directory object and registers '/' in directory entry 0, and it creates a filetable and stores the directory in the filetable. It also reads the contents of the root directory into the directory entry and copies all that data into the directory.
 
+## sync
+The sync method writes the directory information to disk. Our method accomplishes this by opening teh root in write mode as a dentry, loading the directory data into a temporary buffer. Writing that buffer the to root file in the directory entry and finally calling superblock's sync method to write teh contents of directory to disk.
+
 ## format
 The format method has the requirement of formatting the disk by taking in the number of files to be created as a parameter. My method does this by first checking validating if there are any files before calling the superblock's format method. and returning true. If the file parameter is invalid however, it returns false.
 
