@@ -26,9 +26,9 @@ public class DirectoryTest {
   
   
   public static void test1() {
-    // directory test
+   System.out.println("test1");
     Directory dir = new Directory(10);
-    System.out.println(bytesToHex(dir.directory2bytes()));
+    //System.out.println(bytesToHex(dir.directory2bytes()));
     
     short idx = dir.ialloc("foo");
 
@@ -57,17 +57,18 @@ public class DirectoryTest {
       System.out.println("failure ifree 3");
     
       
-      System.out.println(bytesToHex(dirBytes));
+      //System.out.println(bytesToHex(dirBytes));
   }
   
   public static void test2()
   {
+    System.out.println("test2");
     Directory dir = new Directory(4);
     dir.ialloc("foo");
     dir.ialloc("bar");
     dir.ialloc("tar");
     byte[] dirBytes = dir.directory2bytes();
-    System.out.println(bytesToHex(dirBytes));
+    //System.out.println(bytesToHex(dirBytes));
     dir.bytes2directory(dirBytes);
     
     short id = dir.namei("foo");
@@ -80,8 +81,15 @@ public class DirectoryTest {
      if (id == -1)
        System.out.println("failure bytes2directory 3");    
      
-     dirBytes = dir.directory2bytes();
-     System.out.println(bytesToHex(dirBytes));
+     byte[] dirBytes2 = dir.directory2bytes();
+     if (dirBytes.length != dirBytes2.length)
+       System.out.println("directory2bytes issue");
+     //System.out.println(bytesToHex(dirBytes));
+     
+     String a = bytesToHex(dirBytes);
+     String b = bytesToHex(dirBytes2);
+     if (a.compareTo(b) != 0)
+       System.out.println("dirBytes != dirBytes2 issue");
     
     
     
@@ -89,31 +97,40 @@ public class DirectoryTest {
   
   public static void test3()
   {
+    System.out.println("test3");
     int myInt = 1;
     byte[] myBytes = new byte[16];
     SysLib.int2bytes(myInt, myBytes, 0);
     myInt = 3;
     SysLib.int2bytes(myInt, myBytes, 4);
-    myInt = 3;
+    myInt = 4;
     SysLib.int2bytes(myInt, myBytes, 8);
-    myInt = 3;
+    myInt = 5;
     SysLib.int2bytes(myInt, myBytes, 12);        
-    printBytes(myBytes);
+    //printBytes(myBytes);
     
     int myInt2 = SysLib.bytes2int( myBytes, 0 );
-    System.out.println(myInt2);
+    if (myInt2 != 1)
+      System.out.println("test3 issue 1");
+    
     myInt2 = SysLib.bytes2int( myBytes, 4 );
-    System.out.println(myInt2);
+    if (myInt2 != 3)
+      System.out.println("test3 issue 2");
+    
     myInt2 = SysLib.bytes2int( myBytes, 8 );
-    System.out.println(myInt2);
+    if (myInt2 != 4)
+      System.out.println("test3 issue 3");
+    
     myInt2 = SysLib.bytes2int( myBytes, 12 );
-    System.out.println(myInt2);
+    if (myInt2 != 5)
+      System.out.println("test3 issue 4");
+    //System.out.println(myInt2);
   }
   
   public static void main(String args[])
   {
-    //test1();
-    //test2();
+    test1();
+    test2();
     test3();
   }
   

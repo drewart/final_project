@@ -22,25 +22,20 @@ public class Directory {
   
   
   // initialize directory with byte[] from disk
-  public void bytes2directory( byte data[] ) {
+  public void bytes2directory( byte[] data ) {
    // assumes data[] received directory information from disk
    // initializes the directory instance with the data[]
    int offset = 0;
    for ( int i = 0; i < fsize.length; i++,offset += 4 ) // 4 byte int
    {
      fsize[i] = SysLib.bytes2int( data, offset );
-     
-     System.out.println(i + " : " + fsize[i] + " offset: " + offset);
    }
-   
-   DirectoryTest.printBytes(data);
-   
    for (int i = 0; i < fnames.length; i++, offset += maxChar * 2) // 2 byte per char 
    {
      String fname = new String(data, offset,maxChar*2);
      fname.getChars(0, fsize[i], fnames[i], 0 );
    }
-   DirectoryTest.printBytes(data);
+   
   }
   
   // converts directory information into byte[]
@@ -54,16 +49,14 @@ public class Directory {
     int offset = 0;
     for( int i = 0; i < fsize.length; i++, offset += 4 )
     {
-      System.out.println(i + " : " + fsize[i] + " offset" + offset);
       SysLib.int2bytes(this.fsize[i], data, offset);
-      
     }
     
     for( int i = 0; i < fnames.length; i++, offset += maxChar * 2)  
     { 
-        String str = new String(this.fnames[i], 0, fsize[i]);
-       byte[] strBytes = str.getBytes();
-      System.arraycopy(strBytes, 0, data, i, strBytes.length);
+      String str = new String(this.fnames[i], 0, fsize[i]);
+      byte[] strBytes = str.getBytes();
+      System.arraycopy(strBytes, 0, data, offset, strBytes.length);
     }
     return data;
   }
