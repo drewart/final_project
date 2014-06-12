@@ -33,7 +33,7 @@ public class FileSystem extends Thread
         }
         close(dirEnt);
     }
-
+     
     // Formats the disk, (i.e., Disk.java's data contents). The parameter files 
     // specifies the maximum number of files to be created, (i.e., the number 
     // of inodes to be allocated) in your file system. The return value is 0 on 
@@ -103,20 +103,78 @@ public class FileSystem extends Thread
             return ftEnt.inode.length;
         }
     }
- 
-    // Destroys the file specified by fileName. If the file is currently open, 
-    // it is not destroyed until the last open on it is closed, but new 
-    // attempts to open it will fail.
-    boolean delete(String filename)
+     
+    // Reads up to buffer.length bytes from the file indicated by fd, starting 
+    // at the position currently pointed to by the seek pointer. If bytes 
+    // remaining between the current seek pointer and the end of file are less 
+    // than buffer.length, SysLib.read reads as many bytes as possible, putting 
+    // them into the beginning of buffer. It increments the seek pointer by the 
+    // number of bytes to have been read. The return value is the number of 
+    // bytes that have been read, or a negative value upon an error.
+    int read(FileTableEntry ftEnt, byte[] buffer)
     {
-        // get the FT entry
-        FileTableEntry ftEnt = open(filename, "w");
+        // number of bytes read
+        int readBytes = 0;
+        // number of bytes to read
+        int lengthRead = buffer.length;
+        // Validate input
+        if (ftEnt.mode.equals("w") || ftEnt.mode.equals("a")) 
+        {
+            return -1;
+        }
 
-        // Get the entry's inode number
-        short iNum = ftEnt.iNumber; 
+        // enter the CS
+        synchronized (ftEnt) 
+        {
+            while (lengthRead > 0)
+            {
+                // break out if gone beyond the filetable entry
+                if (ftEnt.seekPtr >= fsize(ftEnt))
+                {
+                    break;
+                }
+                // Get the current block that the pointer is pointing to 
+                int currBlock = ftEnt.inode.findTargetBlock(ftEnt.seekPtr);
+                if (currBlock == -1) 
+                {
+                    return -1;
+                }
 
-        // only if completely closed and deallocate the inode number so it will
-        // fail upon any new attempts to open it.
-        return close(ftEnt) && this.directory.ifree(iNum);
+                // Create a temporary block to copy into
+                byte[] tmpBlock = new byte[Disk.blockSize];
+
+                // Read the contents of the current block into the temp block
+                int readStatus = SysLib.rawread(currBlock, tmpBlock);
+                if (readStatus == -1)
+                {
+                    return -1;
+                }
+
+                // Get the current pointer offset
+                int offset = ftEnt.seekPtr % 512;
+
+                // Find the remaining bytes in the block
+                int bytesInBlock = 512 - offset;
+
+                // Find the remaining bytes  in the filetable entry
+                int bytesInFtEnt = fsize(ftEnt) - ftEnt.seekPtr;
+
+                // Get the shortest remaining bytes
+                int rBytes = Math.min(Math.min(bytesInBlock, lengthRead), bytesInFtEnt);
+
+                // Copy the data to the buffer
+                System.arraycopy(tmpBlock, offset, buffer, readBytes, rBytes);
+
+                // Update seek pointer
+                ftEnt.seekPtr += rBytes;
+
+                // Update bytes read thusfar
+                readBytes += rBytes;
+
+                // Update bytes left to read
+                lengthRead -= rBytes;
+            }
+            return readBytes;
+        }
     }
 }
