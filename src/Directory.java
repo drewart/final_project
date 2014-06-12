@@ -1,3 +1,13 @@
+/**
+ * User/Author: Drew Pierce
+ * Team: Danielle Jenkins, Drew Pierce,Timothy Virgillo
+ * Date: 6/12/14
+ *
+ * Description:
+ *  Directory class used to represent Directory and Files for ThreadOS
+ *  used to store locate files and convert Directory and Files to
+ */
+
 public class Directory {
  
   private static int maxChar = 30;  // max char of each file name

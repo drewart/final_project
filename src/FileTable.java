@@ -1,3 +1,11 @@
+/**
+ * User/Author: Drew Pierce
+ * Team: Danielle Jenkins, Drew Pierce,Timothy Virgillo
+ * Date: 6/12/14
+ *
+ * Description:
+ *  FileTable class used to handle the working File read and writes in the ThreadOS
+ */
 import java.util.*;
 /**
 * FileTable class used to store File usage
@@ -28,16 +36,16 @@ public class FileTable {
   public synchronized FileTableEntry falloc( String filename, String mode ) {
     // allocate a new file (structure) table entry for this file name
     // allocate/retrieve and register the corresponding inode using dir
-    // increament this inode's count
-    // imediately write back this inode to the disk
-    /// return a reference to theis file (structure) table entry
+    // increment this inode's count
+    // immediately write back this inode to the disk
+    /// return a reference to this file (structure) table entry
     Inode node = null;
     short fileIndex;
     char modeChar = mode.charAt(0);
 
     while (true){
-      // look up file
-      fileIndex = dir.namei(filename);
+    // look up file
+    fileIndex = dir.namei(filename);
 
       // can't find the file
       if (fileIndex < 0) {
@@ -50,7 +58,7 @@ public class FileTable {
         if ((fileIndex = dir.ialloc(filename)) < 0)
           return null; // return null if fail
 
-        node = new Inode(fileIndex);
+      node = new Inode(fileIndex);
         break;
       }
       // create a new inode for the fileindex
@@ -65,14 +73,14 @@ public class FileTable {
         wait();
       } catch (InterruptedException e) {}
     }
-
       
+
     // increment the node's count
     node.count += 1;
 
     // write the node's contents to disk
     node.toDisk(fileIndex);
-
+      
     // Allocate a new entry 
     FileTableEntry entry = new FileTableEntry(node,fileIndex,mode);
 
