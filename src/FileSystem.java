@@ -33,7 +33,26 @@ public class FileSystem extends Thread
         }
         close(dirEnt);
     }
-     
+    
+    // Writes the directory information to disk
+    void sync()
+    {
+        // Open the root in write mode as the dentry
+        FileTableEntry dirEnt = open("/", "w");
+
+        // Load the directory data into a buffer
+        byte[] dirData = this.directory.directory2bytes();
+
+        // Write that data to the root file
+        write(dirEnt, dirData);
+
+        // Close it since we're done
+        close(dirEnt);
+
+        // Write it all to disk
+        this.superblock.sync();
+    }
+
     // Formats the disk, (i.e., Disk.java's data contents). The parameter files 
     // specifies the maximum number of files to be created, (i.e., the number 
     // of inodes to be allocated) in your file system. The return value is 0 on 
@@ -117,7 +136,7 @@ public class FileSystem extends Thread
         int readBytes = 0;
         // number of bytes to read
         int lengthRead = buffer.length;
-        // Validate input
+        // Validate that we're in read mode
         if (ftEnt.mode.equals("w") || ftEnt.mode.equals("a")) 
         {
             return -1;
@@ -126,6 +145,7 @@ public class FileSystem extends Thread
         // enter the CS
         synchronized (ftEnt) 
         {
+            // While we still have bytes left to read...
             while (lengthRead > 0)
             {
                 // break out if gone beyond the filetable entry
@@ -151,19 +171,19 @@ public class FileSystem extends Thread
                 }
 
                 // Get the current pointer offset
-                int offset = ftEnt.seekPtr % 512;
+                int currPosition = ftEnt.seekPtr % 512;
 
                 // Find the remaining bytes in the block
-                int bytesInBlock = 512 - offset;
+                int bytesInBlock = 512 - currPosition;
 
                 // Find the remaining bytes  in the filetable entry
                 int bytesInFtEnt = fsize(ftEnt) - ftEnt.seekPtr;
 
-                // Get the shortest remaining bytes
+                // Get the shortest remaining bytes of the three
                 int rBytes = Math.min(Math.min(bytesInBlock, lengthRead), bytesInFtEnt);
 
-                // Copy the data to the buffer
-                System.arraycopy(tmpBlock, offset, buffer, readBytes, rBytes);
+                // Copy the data to the buffer from the block
+                System.arraycopy(tmpBlock, currPosition, buffer, readBytes, rBytes);
 
                 // Update seek pointer
                 ftEnt.seekPtr += rBytes;
@@ -174,7 +194,24 @@ public class FileSystem extends Thread
                 // Update bytes left to read
                 lengthRead -= rBytes;
             }
+            // Return the number of bytes reads
             return readBytes;
         }
+    }
+
+    // Destroys the file specified by fileName. If the file is currently open, 
+    // it is not destroyed until the last open on it is closed, but new 
+    // attempts to open it will fail.
+    boolean delete(String filename)
+    {
+        // get the FT entry
+        FileTableEntry ftEnt = open(filename, "w");
+
+        // Get the entry's inode number
+        short iNum = ftEnt.iNumber; 
+
+        // only if completely closed and deallocate the inode number so it will
+        // fail upon any new attempts to open it.
+        return close(ftEnt) && this.directory.ifree(iNum);
     }
 }
