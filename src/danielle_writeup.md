@@ -49,4 +49,4 @@ It accomplishes this with the following algorithm. It locks the file entry by ca
 I would maybe look into using something like Java's "mappedbytebuffer" which can replace the read and write methods and is more efficient at writing to disk. However, I'd have to research a bit more to determine whether it can be properly integrated into ThreadOS to the extent that we need.
 
 ## Extending Functionality
-
+If we were to extend the functionality of our file system we could start implementing more features of a real modern day file system. For example, we could incorporate journaling by keeping a log of changes made to files. That way if any of them got corrupted we could more easily restore them back to normal. Of course, we could also implement a multi-level directory instead of just having root.
