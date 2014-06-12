@@ -191,7 +191,7 @@ public class Inode {
     }
 
     //de-allocate block
-    public byte[] unregisterIndexBlock() throws Exception {
+    public byte[] unregisterIndexBlock() {
         if (indirect >= 0) {
             byte[] dataBuffer = new byte[blockSize];
             SysLib.rawread( indirect, dataBuffer );
