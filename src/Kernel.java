@@ -118,15 +118,21 @@ public class Kernel
                case RAWREAD: // read a block of data from disk
                   while ( disk.read( param, ( byte[] )args ) == false )
                      ioQueue.enqueueAndSleep( COND_DISK_REQ );
+                  while ( disk.testAndResetReady( ) == false )
+                     ioQueue.enqueueAndSleep( COND_DISK_FIN );
                   return OK;
                case RAWWRITE: // write a block of data to disk
                   while ( disk.write( param, ( byte[] )args ) == false )
                      ioQueue.enqueueAndSleep( COND_DISK_REQ );
+                  while ( disk.testAndResetReady( ) == false )
+                     ioQueue.enqueueAndSleep( COND_DISK_FIN );
                   return OK;
                case SYNC:     // synchronize disk data to a real file
                   fs.sync( );
                   while ( disk.sync( ) == false )
                      ioQueue.enqueueAndSleep( COND_DISK_REQ );
+                  while ( disk.testAndResetReady( ) == false )
+                     ioQueue.enqueueAndSleep( COND_DISK_FIN );
                   return OK;
                case READ:
                   switch ( param ) {
@@ -225,6 +231,9 @@ public class Kernel
             }
             return ERROR;
          case INTERRUPT_DISK: // Disk interrupts
+            // wake up the thread waiting for a service completion
+            ioQueue.dequeueAndWakeup( COND_DISK_FIN );
+
             // wake up the thread waiting for a request acceptance
             ioQueue.dequeueAndWakeup( COND_DISK_REQ );
 
