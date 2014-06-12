@@ -19,6 +19,7 @@ public class FileTable {
   
   // major public methods
   /**
+   * method to add or create a file in the FileTable
   * @param filename file name to create/read/write
   * @param mode "r", "w", "w+", or "a"
   */
@@ -29,24 +30,28 @@ public class FileTable {
     // imediately write back this inode to the disk
     /// return a reference to theis file (structure) table entry
     Inode node = null;
-    short fileIndex = dir.namei(filename);
+    short fileIndex;
     char modeChar = mode.charAt(0);
-    
+
+    // look up file
+    fileIndex = dir.namei(filename);
+
     // file not created
-    if (fileIndex == -1)
-      fileIndex = dir.ialloc(filename);
-    
-    if (fileIndex == -1)
-      return null;
-    
     if (modeChar == 'r') {
-      
+
+      // if not file name to read
+      if (fileIndex == -1)
+          return null;
+
       node = new Inode(fileIndex);
       if (node.flag == FLAG_UNUSED)
         node.flag = FLAG_USED;
       
     } else if ( modeChar == 'w' || modeChar == 'a') {
-        
+
+        if (fileIndex == -1)
+            fileIndex = dir.ialloc(filename);
+
         node = new Inode();
         node.flag = 2;
     }
@@ -60,7 +65,8 @@ public class FileTable {
   }
   
   /**
-  * @param entry 
+  * Method to remove a FileEntry from the FileTable
+  * @param entry File entry to remove from the FileTable
   */
   public synchronized boolean ffree( FileTableEntry entry ) {
     // receive a file table entry reference
@@ -85,7 +91,11 @@ public class FileTable {
     }
     return false;
   }
-  
+
+    /**
+     * method to check if the file table is empty
+     * @return if the table is empty
+     */
   public synchronized boolean fempty() {
     return table.isEmpty();
   }
