@@ -87,8 +87,7 @@ public class Scheduler extends Thread
    private void schedulerSleep( ) {
       try {
          Thread.sleep( timeSlice );
-      } catch ( InterruptedException e ) {
-      }
+      } catch ( InterruptedException e ) { }
    }
 
    // A modified addThread of p161 example
@@ -100,6 +99,18 @@ public class Scheduler extends Thread
       if ( tid == -1)
          return null;
       TCB tcb = new TCB( t, tid, pid ); // create a new TCB
+
+      // the following if and for statements are for file system.
+      if ( parentTcb != null ) {
+         for ( int i = 0; i < 32; i++ ) {
+            tcb.ftEnt[i] = parentTcb.ftEnt[i];
+            // JFM added 2012-12-01
+            // increment the count for any file table entries inherited from parent
+            if ( tcb.ftEnt[i] != null )
+               tcb.ftEnt[i].count++;
+         }
+      }
+
       queue.add( tcb );
       return tcb;
    }
@@ -108,10 +119,20 @@ public class Scheduler extends Thread
    // Removing the TCB of a terminating thread
    public boolean deleteThread( ) {
       TCB tcb = getMyTcb( ); 
-      if ( tcb!= null )
-         return tcb.setTerminated( );
-      else
+      if ( tcb == null )
          return false;
+      else {
+         // JFM added 2012-12-01
+         // if any file table entries are still open, decrement their count
+         for ( int i = 3; i < 32; i++ )
+            if ( tcb.ftEnt[i] != null )
+               // JFM changed 2012-12-13
+               // close any open file descriptors rather than decrement the counts
+               // to ensure that system-wide file table entries are removed
+               // when no longer needed
+               SysLib.close( i );
+         return tcb.setTerminated( );
+      }
    }
 
    public void sleepThread( int milliseconds ) {

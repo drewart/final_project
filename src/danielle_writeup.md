@@ -1,6 +1,9 @@
 //Danielle Jenkins
+// Team Members: Timothy Virgillo, Drew Pierce
+// CSS430
+// 06/07/14
 
-# FileSystem
+# FileSystem Report
 
 ## constructor
 The file system constructor initializes three main objects: it creates a super-block along with formatting the disk with 64 inodes by default, creates a directory object and registers '/' in directory entry 0, and it creates a file-table and stores the directory in the file table. It also reads the contents of the root directory into the directory entry and copies all that data into the directory.
